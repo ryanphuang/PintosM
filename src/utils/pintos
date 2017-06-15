@@ -36,7 +36,9 @@ our ($align);			# Partition alignment.
 parse_command_line ();
 prepare_scratch_disk ();
 find_disks ();
-run_vm ();
+if (@kernel_args || $tmp_disk == 1) {
+  run_vm ();
+}
 finish_scratch_disk ();
 
 exit 0;
@@ -51,53 +53,56 @@ sub parse_command_line {
     while ((my $arg = shift (@kernel_args)) ne '--') {
       push (@ARGV, $arg);
     }
-    GetOptions ("sim=s" => sub { set_sim ($_[1]) },
-      "bochs" => sub { set_sim ("bochs") },
-      "qemu" => sub { set_sim ("qemu") },
-      "player" => sub { set_sim ("player") },
+  } else {
+    @kernel_args = ();
+  }
+  GetOptions ("sim=s" => sub { set_sim ($_[1]) },
+    "bochs" => sub { set_sim ("bochs") },
+    "qemu" => sub { set_sim ("qemu") },
+    "player" => sub { set_sim ("player") },
 
-      "debug=s" => sub { set_debug ($_[1]) },
-      "no-debug" => sub { set_debug ("none") },
-      "monitor" => sub { set_debug ("monitor") },
-      "gdb" => sub { set_debug ("gdb") },
+    "debug=s" => sub { set_debug ($_[1]) },
+    "no-debug" => sub { set_debug ("none") },
+    "monitor" => sub { set_debug ("monitor") },
+    "gdb" => sub { set_debug ("gdb") },
 
-      "m|memory=i" => \$mem,
-      "j|jitter=i" => sub { set_jitter ($_[1]) },
-      "r|realtime" => sub { set_realtime () },
+    "m|memory=i" => \$mem,
+    "j|jitter=i" => sub { set_jitter ($_[1]) },
+    "r|realtime" => sub { set_realtime () },
 
-      "T|timeout=i" => \$timeout,
-      "k|kill-on-failure" => \$kill_on_failure,
+    "T|timeout=i" => \$timeout,
+    "k|kill-on-failure" => \$kill_on_failure,
 
-      "v|no-vga" => sub { set_vga ('none'); },
-      "s|no-serial" => sub { $serial = 0; },
-      "t|terminal" => sub { set_vga ('terminal'); },
+    "v|no-vga" => sub { set_vga ('none'); },
+    "s|no-serial" => sub { $serial = 0; },
+    "t|terminal" => sub { set_vga ('terminal'); },
 
-      "p|put-file=s" => sub { add_file (\@puts, $_[1]); },
-      "g|get-file=s" => sub { add_file (\@gets, $_[1]); },
-      "a|as=s" => sub { set_as ($_[1]); },
+    "p|put-file=s" => sub { add_file (\@puts, $_[1]); },
+    "g|get-file=s" => sub { add_file (\@gets, $_[1]); },
+    "a|as=s" => sub { set_as ($_[1]); },
 
-      "h|help" => sub { usage (0); },
+    "h|help" => sub { usage (0); },
 
-      "kernel=s" => \&set_part,
-      "filesys=s" => \&set_part,
-      "swap=s" => \&set_part,
+    "kernel=s" => \&set_part,
+    "filesys=s" => \&set_part,
+    "swap=s" => \&set_part,
 
-      "filesys-size=s" => \&set_part,
-      "scratch-size=s" => \&set_part,
-      "swap-size=s" => \&set_part,
+    "filesys-size=s" => \&set_part,
+    "scratch-size=s" => \&set_part,
+    "swap-size=s" => \&set_part,
 
-      "kernel-from=s" => \&set_part,
-      "filesys-from=s" => \&set_part,
-      "swap-from=s" => \&set_part,
+    "kernel-from=s" => \&set_part,
+    "filesys-from=s" => \&set_part,
+    "swap-from=s" => \&set_part,
 
-      "make-disk=s" => sub { $make_disk = $_[1];
-        $tmp_disk = 0; },
-      "disk=s" => sub { set_disk ($_[1]); },
-      "loader=s" => \$loader_fn,
+    "make-disk=s" => sub { $make_disk = $_[1];
+      $tmp_disk = 0; },
+    "disk=s" => sub { set_disk ($_[1]); },
+    "loader=s" => \$loader_fn,
 
-      "geometry=s" => \&set_geometry,
-      "align=s" => \&set_align)
-      or exit 1;
+    "geometry=s" => \&set_geometry,
+    "align=s" => \&set_align)
+    or exit 1;
   }
 
   $sim = "bochs" if !defined $sim;
