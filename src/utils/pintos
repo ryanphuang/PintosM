@@ -103,7 +103,6 @@ sub parse_command_line {
     "geometry=s" => \&set_geometry,
     "align=s" => \&set_align)
     or exit 1;
-  }
 
   $sim = "bochs" if !defined $sim;
   $debug = "none" if !defined $debug;
