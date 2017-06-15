@@ -47,7 +47,7 @@ sub set_part {
   my ($role, $source) = $opt =~ /^([a-z]+)(?:-([a-z]+))?/ or die;
 
   $role = uc $role;
-  $source = 'FILE' if $source eq '';
+  $source = 'file' if !defined $source || $source eq '';
 
   die "can't have two sources for \L$role\E partition"
   if exists $parts{$role};
@@ -88,7 +88,7 @@ sub do_set_part {
     $p->{OFFSET} = 0;
     $p->{BYTES} = ceil ($arg * 1024 * 1024);
   } else {
-    die;
+    die "unknown source $source to set $role\n";
   }
 }
 
