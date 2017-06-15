@@ -29,11 +29,11 @@ the tool chain. Otherwise, build the following:
     ```
 
 * GCC:  
- - **URL**: https://ftp.gnu.org/gnu/gcc/gcc-6.2.0/gcc-6.2.0.tar.bz2
- - **pre-requisite**:
+  - **URL**: https://ftp.gnu.org/gnu/gcc/gcc-6.2.0/gcc-6.2.0.tar.bz2
+  - **pre-requisite**:
     - `gmp`, `mpfr`, `mpc`
     - the corresponding versions can be downloaded using script `gcc-6.2.0/download_prerequisites`
- - **build flag**:
+  - **build flag**:
     ```
     cd gcc-6.2.0 && ./configure --prefix=$PREFIX --target=i386-elf \
     --disable-multilib --disable-nls --disable-werror --disable-libssp \
@@ -41,11 +41,16 @@ the tool chain. Otherwise, build the following:
     ```
 
 * GDB:
- - **URL**: https://ftp.gnu.org/gnu/gdb/gdb-7.9.1.tar.xz 
- - **build flag**:
+  - **URL**: https://ftp.gnu.org/gnu/gdb/gdb-7.9.1.tar.xz 
+  - **build flag**:
    ```
     cd gdb-7.9.1 && ./configure --prefix=$PREFIX --target=i386-elf --disable-werror
    ```
 
 A sample build script that does the above is provided at `scripts/build_toolchain.sh`. 
 It has been tested on macOS Sierra and Ubuntu 16.04.
+
+In addition to the compiler tool chain, it is best to run Pintos in x86 simulator,
+QEMU and Bochs, rather than bare metal while doing development. 
+
+TODO: build and instructions for QEMU/Bochs.
