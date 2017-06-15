@@ -100,6 +100,10 @@ loader.bin: threads/loader.o
 os.dsk: kernel.bin
 	cat $^ > $@
 
+kernel.img: kernel.bin loader.bin
+	rm -f $@
+	$(PINTOS) --make-disk=$@ --kernel=kernel.bin --loader=loader.bin
+
 clean::
 	rm -f $(OBJECTS) $(DEPENDS) 
 	rm -f threads/loader.o threads/kernel.lds.s threads/loader.d
