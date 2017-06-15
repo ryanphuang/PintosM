@@ -104,6 +104,9 @@ kernel.img: kernel.bin loader.bin
 	rm -f $@
 	$(PINTOS) --make-disk=$@ --kernel=kernel.bin --loader=loader.bin
 
+qemu: kernel.img
+	$(QEMU) -drive file=kernel.img,index=0,media=disk,format=raw 
+
 clean::
 	rm -f $(OBJECTS) $(DEPENDS) 
 	rm -f threads/loader.o threads/kernel.lds.s threads/loader.d
@@ -117,3 +120,5 @@ Makefile: $(SRCDIR)/Makefile.build
 	cp $< $@
 
 -include $(DEPENDS)
+
+.PHONY: all clean qemu image

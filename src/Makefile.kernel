@@ -16,5 +16,9 @@ build/Makefile: ../Makefile.build
 build/%: $(DIRS) build/Makefile
 	cd build && $(MAKE) $*
 
+image: build/kernel.img
+
+qemu: build/qemu
+
 clean:
 	rm -rf build
