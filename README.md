@@ -22,10 +22,18 @@ the tool chain. Otherwise, build the following:
 
 * GNU binutils:
   - **URL**: https://ftp.gnu.org/gnu/binutils/binutils-2.27.tar.gz
-  - **build flag** (set $PREFIX to the installation location): 
+  - **ENV**:
+    ```bash
+    PREFIX=/path/to/install
+    export PATH=$PREFIX/bin:$PATH
+    export LD_LIBRARY_PATH=$PREFIX/lib:$LD_LIBRARY_PATH
     ```
-    cd binutils-2.27 && ./configure --prefix=$PREFIX --target=i386-elf \
-    --disable-multilib --disable-nls --disable-werror
+  - **build flag**
+    ```bash
+    $ cd binutils-2.27 && ./configure --prefix=$PREFIX --target=i386-elf \
+      --disable-multilib --disable-nls --disable-werror
+    $ make -j8
+    $ make install
     ```
 
 * GCC:  
@@ -34,17 +42,23 @@ the tool chain. Otherwise, build the following:
     - `gmp`, `mpfr`, `mpc`
     - the corresponding versions can be downloaded using script `gcc-6.2.0/download_prerequisites`
   - **build flag**:
-    ```
-    cd gcc-6.2.0 && ./configure --prefix=$PREFIX --target=i386-elf \
+    ```bash
+    $ cd gcc-6.2.0 && ./configure --prefix=$PREFIX --target=i386-elf \
     --disable-multilib --disable-nls --disable-werror --disable-libssp \
     --disable-libmudflap --with-newlib --without-headers --enable-languages=c,c++
+    $ make -j8 all-gcc 
+    $ make install-gcc
+    $ make all-target-libgcc
+    $ make install-target-libgcc
     ```
 
 * GDB:
   - **URL**: https://ftp.gnu.org/gnu/gdb/gdb-7.9.1.tar.xz 
   - **build flag**:
-   ```
-    cd gdb-7.9.1 && ./configure --prefix=$PREFIX --target=i386-elf --disable-werror
+   ```bash
+    $ cd gdb-7.9.1 && ./configure --prefix=$PREFIX --target=i386-elf --disable-werror
+    $ make -j8
+    $ make install
    ```
 
 A sample build script that does the above is provided at `scripts/build_toolchain.sh`. 
