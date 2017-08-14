@@ -57,8 +57,13 @@ usage()
 
     DEST_DIR: Base directory to store the downloeaded source code, build and 
               distribute the compiled toolchain.
-    TOOL:     By default, this script build binutils, GCC, and GDB. 
-              Specify a single tool to download and build.
+    TOOL:     By default, this script build three targets: binutils, GCC, and GDB. 
+              Specify a single target to download and build. Must be one of
+              {binutils, gcc, gdb}.
+
+  Example:
+    1. $0 /home/ryan/318/toolchain
+    2. $0 /home/ryan/318/toolchain gcc
 
 EOF
 }
