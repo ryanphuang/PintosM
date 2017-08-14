@@ -4,9 +4,11 @@
 # 
 # Setup OS lab tool chain (i386-elf-* cross compiler). 
 #
-# Tested on Mac OS X.
+# Tested on Mac OS, Ubuntu and Fedora.
 #
 # Author: Ryan Huang <huang@cs.jhu.edu>
+#
+# Example Usage: ./toolchain-build.sh /home/ryan/318/toolchain
 #
 
 perror()
