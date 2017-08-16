@@ -75,7 +75,7 @@ if [ $# -eq 0 ]; then
   exit 1
 fi
 
-if [ "$1" == "-h" ]; then
+if [ "$1" == "-h" -o "$1" == "--help" ]; then
   usage
   exit 0
 fi
