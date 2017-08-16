@@ -97,7 +97,7 @@ PREFIX=$CWD/dist
 export PATH=$PREFIX/bin:$PATH
 if [ $os == "Linux" ]; then
   export LD_LIBRARY_PATH=$PREFIX/lib:$LD_LIBRARY_PATH
-elif [ $of == "Darwin" ]; then
+elif [ $os == "Darwin" ]; then
   export DYLD_LIBRARY_PATH=$PREFIX/lib:$DYLD_LIBRARY_PATH
 else
   perror "Unsupported OS: $os"
