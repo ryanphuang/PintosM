@@ -1,5 +1,5 @@
 # Pintos
-Labs for undergraduate OS class (600.318) at Johns Hopkins. [Pintos](http://pintos-os.org) 
+Labs for undergraduate OS class (EN.601.318/418) at Johns Hopkins CS. [Pintos](http://pintos-os.org) 
 is a teaching operating system for x86, challenging but not overwhelming, small
 but realistic enough to understand OS in depth (it can run x86 machine and simulators 
 including QEMU, Bochs and VMWare Player!). The main source code, documentation and assignments 
@@ -12,7 +12,7 @@ Pintos labs to tailor for his class. They include:
 * Make qemu image and run it in non-test mode.
 * Misc
 
-**This is the upstream branch to track the changes. For students, please clone
+**This is the upstream branch to track the changes. For students in the class, please clone
 or download the release version from [here](https://github.com/jhu-cs318/pintos.git)
 to work on the projects.**
 
