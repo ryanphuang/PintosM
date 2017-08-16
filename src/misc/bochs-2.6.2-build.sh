@@ -11,12 +11,12 @@ if [ ! -f $CWD/bochs-2.6.2-jitter-plus-segv.patch -a -f $CWD/bochs-2.6.2-xrandr-
   exit 1
 fi
 
-DSTDIR=$(cd $1 && pwd)
-mkdir -p $DSTDIR
-if [ ! -d $DSTDIR ]; then
+mkdir -p $1
+if [ ! -d $1 ]; then
   echo "Could not find or create the destination directory"
   exit 1
 fi
+DSTDIR=$(cd $1 && pwd)
 
 cd /tmp
 mkdir $$
