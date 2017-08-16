@@ -103,7 +103,6 @@ else
   perror "Unsupported OS: $os"
 fi
 
-mkdir -p src build/{binutils,gcc,gdb} dist
 TARGET=i386-elf
 
 # Download sources
