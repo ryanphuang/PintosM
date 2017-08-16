@@ -29,15 +29,13 @@ cat $CWD/bochs-2.6.2-xrandr-pkgconfig.patch | patch -p1
 cat $CWD/bochs-2.6.2-banner-stderr.patch | patch -p1
 cat $CWD/bochs-2.6.2-block-device-check.patch | patch -p1
 CFGOPTS="--with-x --with-x11 --with-term --with-nogui --prefix=$DSTDIR"
-mkdir plain &&
-        cd plain && 
-        ../configure $CFGOPTS --enable-gdb-stub && 
-        make && 
-        make install &&
-        cd ..
-mkdir with-dbg &&
-        cd with-dbg &&
-        ../configure --enable-debugger --disable-debugger-gui $CFGOPTS &&
-        make &&
-        cp bochs $DSTDIR/bin/bochs-dbg &&
-        cd ..
+WD=$(pwd)
+mkdir plain && cd plain
+../configure $CFGOPTS --enable-gdb-stub && 
+make -j8 && make install
+cd $WD
+mkdir with-dbg && cd with-dbg 
+../configure --enable-debugger --disable-debugger-gui $CFGOPTS &&
+make -j8
+cp bochs $DSTDIR/bin/bochs-dbg 
+cd $WD
