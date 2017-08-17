@@ -10,6 +10,8 @@ The course instructor ([Ryan Huang](huang@cs.jhu.edu)) made some changes to the 
 Pintos labs to tailor for his class. They include:
 * Tweaks to Makefiles for tool chain configuration and some new targets
 * Make qemu image and run it in non-test mode.
+* Tweaks to run on Mac OS
+* Color testing result
 * Misc
 
 **This is the upstream branch to track the changes. For students in the class, please clone
