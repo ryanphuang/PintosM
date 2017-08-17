@@ -91,7 +91,7 @@ handle_error (ssize_t retval, int *fd, bool fd_is_pty, const char *call)
               *fd = -1;
             }
           else
-            fail_io (call); 
+            fail_io ("%s", call); 
         }
     }
   else 
@@ -102,7 +102,7 @@ handle_error (ssize_t retval, int *fd, bool fd_is_pty, const char *call)
           *fd = -1;
         }
       else
-        fail_io (call);
+        fail_io ("%s", call);
     }
 }
 
