@@ -41,8 +41,33 @@ define clean
 rm -rf $@
 endef
 
+define patch-p1
+(cd p1 && patch -p1) < ../solutions/p1.patch
+endef
+
+define patch-p2
+(cd p2 && patch -p1) < ../solutions/p1.patch
+(cd p2 && patch -p1) < ../solutions/p2.patch
+endef
+
+define patch-p3
+(cd p3 && patch -p1) < ../solutions/p1.patch
+(cd p3 && patch -p1) < ../solutions/p2.patch
+(cd p3 && patch -p1) < ../solutions/p3.patch
+endef
+
+define patch-p4
+(cd p4 && patch -p1) < ../solutions/p1.patch
+(cd p4 && patch -p1) < ../solutions/p2.patch
+(cd p4 && patch -p1) < ../solutions/p3.patch
+(cd p4 && patch -p1) < ../solutions/p4.patch
+endef
+
 define apply-patch
-(cd $@ && patch -p0) < ../solutions/$@.patch
+$(if $(filter $@, p1), $(patch-p1))
+$(if $(filter $@, p2), $(patch-p2))
+$(if $(filter $@, p3), $(patch-p3))
+$(if $(filter $@, p4), $(patch-p4))
 endef
 
 PROJECT = $@
