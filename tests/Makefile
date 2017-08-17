@@ -34,7 +34,7 @@ endef
 
 define test-clean
 cd $@/src/$(PROJECT)/build && $(MAKE) clean
-cd $@/src/$(PROJECT)/build && set `find -type f` > /dev/null && test $$# = 1
+cd $@/src/$(PROJECT)/build && set `find . -type f` > /dev/null && test $$# = 1
 endef
 
 define clean
