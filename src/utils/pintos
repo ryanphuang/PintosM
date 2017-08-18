@@ -895,7 +895,7 @@ sub timeout {
   &$cleanup ();
   seek (STDOUT, 0, 2);
   if (!defined ($cause)) {
-    my ($load_avg) = `uptime` =~ /(load average:.*)$/i;
+    my ($load_avg) = `uptime` =~ /(load averages?:.*)$/i;
     print "\nTIMEOUT after ", time () - $start_time,
     " seconds of wall-clock time";
     print  " - $load_avg" if defined $load_avg;
@@ -909,8 +909,13 @@ sub timeout {
 # Returns the system load average over the last minute.
 # If the load average is less than 1.0 or cannot be determined, returns 1.0.
 sub get_load_average {
-  my ($avg) = `uptime` =~ /load average:\s*([^,]+),/;
-  return $avg >= 1.0 ? $avg : 1.0;
+  if ($^O eq 'darwin') {
+    my ($avg) = `uptime` =~ /load averages:\s*([^ ]+) /;
+    return $avg >= 1.0 ? $avg : 1.0;
+  } else {
+    my ($avg) = `uptime` =~ /load average:\s*([^,]+),/;
+    return $avg >= 1.0 ? $avg : 1.0;
+  }
 }
 
 # Calls setitimer to set a timeout, then execs what was passed to us.

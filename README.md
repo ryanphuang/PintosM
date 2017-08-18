@@ -22,5 +22,5 @@ or download the release version from [here](https://github.com/jhu-cs318/pintos.
 to work on the projects.**
 
 ## Setup
-We wrote a [guide](https://cs.jhu.edu/~huang/cs318/fall17/project/setup.html) on 
+The instructor wrote a detailed [guide](https://cs.jhu.edu/~huang/cs318/fall17/project/setup.html) on 
 how to setup the toolchain and development environment to work on Pintos projects.
