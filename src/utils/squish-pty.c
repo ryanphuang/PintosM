@@ -339,9 +339,22 @@ main (int argc __attribute__ ((unused)), char *argv[])
     }
   else 
     {
+      /* huang@cs.jhu.edu - 
+       * On recent BSD system, the first setitimer call seems to have an integer
+       * overflow bug that would cause tv_usec field of the old_itmerval to be
+       * either negative or greater than 999999, which would then call the second
+       * setitimer call to fail with EINVAL. Fix by do a sanity check first. We
+       * set the tv_usec to 999999 in both invalid conditions.
+       */
+      if (old_itimerval.it_value.tv_usec < 0 || old_itimerval.it_value.tv_usec > 999999) {
+        old_itimerval.it_value.tv_usec = 999999;
+      }
+      if (old_itimerval.it_interval.tv_usec < 0 || old_itimerval.it_interval.tv_usec > 999999) {
+        old_itimerval.it_interval.tv_usec = 999999;
+      }
       /* Running in child process. */
       if (setitimer (ITIMER_VIRTUAL, &old_itimerval, NULL) < 0)
-        fail_io ("setitimer");
+        fail_io ("setitimer-child");
       if (dup2 (slave, STDOUT_FILENO) < 0)
         fail_io ("dup2");
       if (close (pipe_fds[0]) < 0 || close (pipe_fds[1]) < 0
