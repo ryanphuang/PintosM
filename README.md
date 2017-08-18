@@ -10,11 +10,12 @@ The course instructor ([Ryan Huang](huang@cs.jhu.edu)) made some changes to the 
 Pintos labs to tailor for his class. They include:
 * Tweaks to Makefiles for tool chain configuration and some new targets
 * Make qemu image and run it in non-test mode.
-* Tweaks to run Pintos on Mac OS
+* Tweaks and patches to get Pintos run and test on Mac OS
 * Color testing result
 * Bochs build fix
+* Various bug fixes
 * Lab 0
-* Misc
+* Misc enhancement
 
 **This is the upstream branch to track the changes. For students in the class, please clone
 or download the release version from [here](https://github.com/jhu-cs318/pintos.git)
