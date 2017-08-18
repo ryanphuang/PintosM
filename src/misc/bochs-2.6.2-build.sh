@@ -1,6 +1,6 @@
 #! /bin/bash
 
-if [ $# -ne 1 -o $1 == "-h" -o $1 == "--help" ]; then
+if [ $# -ne 1 ] || [ $1 == "-h" -o $1 == "--help" ]; then
   echo "Usage: $0 DSTDIR"
   exit 1
 fi
@@ -29,6 +29,16 @@ cat $CWD/bochs-2.6.2-xrandr-pkgconfig.patch | patch -p1
 cat $CWD/bochs-2.6.2-banner-stderr.patch | patch -p1
 cat $CWD/bochs-2.6.2-block-device-check.patch | patch -p1
 CFGOPTS="--with-x --with-x11 --with-term --with-nogui --prefix=$DSTDIR"
+os="`uname`"
+if [ $os == "Darwin" ]; then
+  if [ ! -d /opt/X11 ]; then
+    echo "Error: X11 directory does not exist. Have you installed XQuartz https://www.xquartz.org?" 
+    exit 1
+  fi
+  # Bochs will have trouble finding X11 header files and library
+  # We need to set the pkg config path explicitly.
+  export PKG_CONFIG_PATH=/opt/X11/lib/pkgconfig
+fi
 WD=$(pwd)
 mkdir plain && cd plain
 ../configure $CFGOPTS --enable-gdb-stub && 
