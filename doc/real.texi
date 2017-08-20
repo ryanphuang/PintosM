@@ -5,9 +5,9 @@ This assignment is setup to prepare you for the later Pintos projects. It will
 walk you through what happens after a PC is powered on till when an operating
 system is up and running, which you may have wondered about it before. You will
 setup the development environment, learn the Pintos workflow, and run/debug it 
-in QEMU and Bochs. You will then do a programming exercise to add a simple kernel 
-monitor to Pintos. Note that this assignment is simpler than the reset of the 
-projects as it is intentionally designed to help you warm up.
+in QEMU and Bochs. You will then do a simple programming exercise to add a 
+tiny kernel monitor to Pintos. Note that this assignment is simpler than the 
+reset of the projects as it is intentionally designed to help you warm up.
 
 Part of this project's description and exercise is borrowed from the MIT 
 6.828 and Caltech CS 124 course.
@@ -15,27 +15,17 @@ Part of this project's description and exercise is borrowed from the MIT
 @menu
 * Project 0 Background::        
 * Project 0 Requirements::      
-* Project 0 FAQ::               
 @end menu
 
 @node Project 0 Background
 @section Background
 
 @menu
-* Setup::       
 * PC Bootstrap::      
 * The Boot Loader::      
 * The Kernel::      
 
 @end menu
-
-@node Setup
-@subsection Setup
-
-Before we move on, make sure you have read the @ref{Introduction} section 
-and have Pintos development environment setup as described in 
-@uref{https://cs.jhu.edu/~huang/cs318/fall17/project/setup.html, , Project Setup}.
-
 
 @node PC Bootstrap
 @subsection PC Bootstrap
@@ -44,27 +34,27 @@ The process of loading the operating system into memory for running
 after a PC is powered on is commonly known as @strong{bootstrapping}. The
 operating system will then be loading other software such as the shell
 for running. Two helpers are responsible for paving the way for bootstrapping: 
-BIOS (Basic Input/Output System) and bootloader. BIOS is the first software 
-that gets run when the computer is powered on to perform some test
-and initialization, e.g., checking memory available and activating video card. 
-After performing this initialization, the BIOS will then try to find a bootable
-device from some appropriate location such as floppy disk, hard disk, 
-CD-ROM, or the network. And the BIOS will pass control of the machine to the 
-bootloader who will load the operating system. 
+BIOS (Basic Input/Output System) and bootloader. The PC hardware is designed
+to make sure BIOS is always gets control of the machine first after the computer is
+powered on. The BIOS will be performing some test and initialization, e.g., checking 
+memory available and activating video card. After this initialization, the BIOS 
+will try to find a bootable device from some appropriate location such as a 
+floppy disk, hard disk, CD-ROM, or the network. Then the BIOS will pass control of 
+the machine to the bootloader who will load the operating system. 
 
 While BIOS and the bootloader have a large task, they have very few resources 
 to do it with. For example, IA32 bootloaders generally have to fit within 512 bytes 
-in memory for a partition or floppy disk bootloader (and the last 2 bytes are
-fixed signatures for recognizing it is a bootloader). For a bootloader in the
-Master Boot Record (MBR), it has to fit in an even smaller 436 bytes. In
-addition, since BIOS and bootloader are running on bare-metals, there are no 
-standard library call like @code{printf} or system call like @code{read} available. 
-Its main leverage is the limited BIOS interrupt services. Many functionalities need 
-to be implemented from scratch. For example, reading content from disk is easy 
-inside OSes with system calls, but in bootloader, it has to deal with disk directly 
-with complex hardware programming routines. As a result, the bootloaders are
-generally written in assembly language, because even C code would include too 
-much bloat!
+in memory for a partition or floppy disk bootloader (i.e., only the first disk
+@emph{sector}, and the last 2 bytes are fixed signatures for recognizing it is 
+a bootloader). For a bootloader in the Master Boot Record (MBR), it has to fit 
+in an even smaller 436 bytes. In addition, since BIOS and bootloader are running 
+on bare-metals, there are no standard library call like @code{printf} or system 
+call like @code{read} available. Its main leverage is the limited BIOS interrupt 
+services. Many functionalities need to be implemented from scratch. For example, 
+reading content from disk is easy inside OSes with system calls, but in bootloader, 
+it has to deal with disk directly with complex hardware programming routines. As 
+a result, the bootloaders are generally written in assembly language, because 
+even C code would include too much bloat!
 
 To further understand this challenge, it is useful to look at the PC's physical 
 address space, which is hard-wired to have the following general layout:
@@ -131,52 +121,35 @@ now commonly reserved by the BIOS for use by 32-bit PCI devices.
 @node The Boot Loader
 @subsection The Boot Loader
 
-IA32 bootloaders also have the unenviable position of running in
-@strong{real-addressing mode} (also known as "real mode"), where the segment
-registers are used to compute the addresses of memory accesses according to
-the following formula:  @var{address} = @var{segment} << 4 + @var{offset}.
-The code segment CS is used for instruction execution (e.g. the BIOS jumps to
-0x0000:7C00, loading CS with 0x0000 and IP with 0x7C00), SS for the stack
-segment, and DS for the data segment.  ES is frequently used for moving data
-around in the bootloader as well.  Note that each segment is 64KiB in size;
+Floppy and hard disks for PCs are divided into 512 byte regions called sectors. 
+A sector is the disk's minimum transfer granularity: each read or write operation 
+must be one or more sectors in size and aligned on a sector boundary. If the disk 
+is bootable, the first sector is called the boot sector, since this is where the 
+boot loader code resides. When the BIOS finds a bootable floppy or hard disk, it 
+loads the 512-byte boot sector into memory at physical addresses @t{0x7c00} through 
+@t{0x7dff}, and then uses a @code{jmp} instruction to set the CS:IP to @t{0000}:@t{7c00}, 
+passing control to the boot loader. 
+
+IA32 bootloaders have the unenviable position of running in @strong{real-addressing 
+mode} (also known as ``real mode''), where the segment registers are used to compute 
+the addresses of memory accesses according to the following formula:  
+@var{address} = 16 * @var{segment} + @var{offset}. The code segment CS is used 
+for instruction execution. For example, when the BIOS jump to @t{0x0000:7c00}, 
+the corresponding physical address is 16 * 0 + @t{7c00} = @t{7c00}. Other 
+segment registers include SS for the stack segment, DS for the data segment,
+and ES for moving data around as well.  Note that each segment is 64KiB in size;
 since bootloaders often have to load kernels that are larger than 64KiB, they
 must utilize the segment registers carefully.
 
-Different operating systems are bootstrapped in different ways:
-@itemize
-@item Different kernels often expect to be loaded at different memory
-      addresses.  Some, like Linux, can be loaded to one of several addresses
-      (small kernels get loaded at address 0x10000 and large kernels get
-      loaded at address 0x100000).
-@item Different kernels occupy different amounts of space, requiring the
-      bootloader to load different amounts of data.
-@item A bootloader must also perform the specific tasks to determine the
-      starting address of the OS kernel to jump to, so that the loader
-      can hand off to the kernel.
-@end itemize
-
-Because of these OS-specific details, the bootloader must be purpose-built for
-the operating system itself.  Larger, multi-purpose bootloaders like GRUB and
-LILO are aware of how to load multiple operating systems, but such bootloaders
-can also implement a mechanism called @strong{chain-loading} to leverage an
-existing operating system bootloader.  A common chain-loading technique for
-IA32 is to copy the chain-loader to address 0x0600, and then load the next
-bootloader at 0x7C00 (emulating what the BIOS did initially).  Then, the
-chain-loader simply jumps to the next bootloader.
-
 Pintos bootloading is a pretty simple process compared to how modern OS kernels
 are loaded.  The kernel is a maximum of 512KiB (or 1024 sectors), and must be
-loaded into memory starting at the address 0x20000.  Note that the Pintos
-kernel isn't required to fit into a single 64KiB segment, so loading this will
-require manipulation of the segment registers.
-
-Pintos does require a specific kind of partition for the OS, so the Pintos
-bootloader must look for a disk partition of the appropriate type.  This means
-that the Pintos bootloader must understand how to utilize Master Boot Records
-(MBRs).  Fortunately they aren't very complicated to understand. Pintos also 
-only supports booting off of a hard disk; therefore, the Pintos
-bootloader doesn't need to check floppy drives or handle disks without an MBR
-in the first sector.
+loaded into memory starting at the address @t{0x20000}. Pintos does require a 
+specific kind of partition for the OS, so the Pintos bootloader must look for a 
+disk partition of the appropriate type.  This means that the Pintos bootloader 
+must understand how to utilize Master Boot Records (MBRs).  Fortunately they 
+aren't very complicated to understand. Pintos also only supports booting off of 
+a hard disk; therefore, the Pintos bootloader doesn't need to check floppy drives 
+or handle disks without an MBR in the first sector.
 
 When the loader finds a bootable kernel partition, it reads the
 partition's contents into memory at physical address @w{128 kB}.  The
@@ -194,9 +167,8 @@ predictable location, but the kernel's ELF header contains a pointer
 to it.  The loader extracts the pointer and jumps to the location it
 points to.
 
-The Pintos kernel command line
-is stored in the boot loader (using about 128 bytes).  The @command{pintos} program actually
-modifies a copy of the boot loader on disk each time it runs the kernel,
+The Pintos kernel command line is stored in the boot loader (using about 128 bytes).  
+The @command{pintos} program actually modifies a copy of the boot loader on disk each time it runs the kernel,
 inserting whatever command-line arguments the user supplies to the kernel,
 and then the kernel at boot time reads those arguments out of the boot
 loader in memory.  This is not an elegant solution, but it is simple
@@ -205,7 +177,7 @@ and effective.
 @node The Kernel
 @subsection The Kernel
 
-The loader's last action is to transfer control to the kernel's entry
+The bootloader's last action is to transfer control to the kernel's entry
 point, which is @func{start} in @file{threads/start.S}.  The job of
 this code is to switch the CPU from legacy 16-bit ``@strong{real mode}'' into
 the 32-bit ``@strong{protected mode}'' used by all modern 80@var{x}86 operating
@@ -231,5 +203,133 @@ will be the main content we will deal with.
 @node Project 0 Requirements
 @section Project 0 Requirements
 
-@node Project 0 FAQ
-@section Project 0 FAQ
+@menu
+* Project 0 Design Document::   
+* Booting Pintos::                 
+* Debugging::                 
+* Kernel Monitor::      
+@end menu
+
+@node Project 0 Design Document
+@subsection Project 0 Design Document
+
+Before you turn in your project, you must copy @uref{real.tmpl, ,
+the project 0 design document template} into your source tree under the
+name @file{pintos/src/p0/DESIGNDOC} and fill it in. 
+
+@node Booting Pintos 
+@subsection Booting Pintos 
+
+Read the @ref{Introduction} section to get an overview of Pintos. Have Pintos development 
+environment setup as described in @uref{https://cs.jhu.edu/~huang/cs318/fall17/project/setup.html, 
+, Project Setup}. Afterwards, execute
+
+@example
+$ cd pintos/src/threads
+$ make qemu
+@end example
+
+If everything works, you should see Pintos booting in the @url{http://www.qemu.org, ,QEMU emulator},
+and print @code{Boot complete.} near the end. In addition to the shell where
+you execute the command, a new graphic window of QEMU will also pop up printing
+the same messages. If you are remotely connecting to a machine, e.g., the 
+lab machines of the CS department, you probably will encounter this error:
+@example
+Unable to init server: Could not connect: Connection refused
+gtk initialization failed
+@end example
+@noindent You need to figure out how to resolve this error and make the QEMU window appear.
+@emph{Hint:} an option in @code{ssh} may be useful, check @code{man ssh}. 
+
+Note that to quit the Pintos interface, for the QEMU window, you can just close
+it; for the terminal, you need to press @code{Ctrl-a x} to exit (if you are
+running inside GNU screen or Tmux and its prefix key is Ctrl-a, 
+press @code{Ctrl-a} @emph{twice} and @code{x} to exit). We also provide a Makefile 
+target to allow you to run Pintos just in the terminal: @code{make qemu-nox}.
+
+While by default we run Pintos in QEMU, Pintos can also run in the 
+@url{http://bochs.sourceforge.net/, ,Bochs} and VMWare Player emulator. 
+Bochs will be useful for the @ref{Project 1--Threads}. To run Pintos with
+Bochs, 
+
+@example
+$ cd pintos/src/threads
+$ make 
+$ cd build
+$ pintos --bochs -- run alarm-zero
+@end example
+
+Take screenshots of the successful booting of Pintos in QEMU and Bochs, each in 
+both the terminal and the QEMU window. Put the screenshots under @file{pintos/src/p0}.
+
+@node Debugging
+@subsection Debugging
+
+While you are working on the projects, you will frequently use the GNU Debugger 
+(GDB) to help you find bugs in your code. Make sure you read the 
+@ref{GDB} section first. In addition, if you are unfamiliar with x86 assembly,
+the @ref{PCASM} is an excellent book to start. Note that you don't need to read 
+the entire book, just the basic ones are enough.
+
+Your first task in this section is to use GDB to trace the QEMU BIOS a bit to understand 
+how an IA-32 compatible computer boots. Answer the following questions in your
+design document:
+@itemize
+@item What is the first instruction that gets executed?
+@item At which physical address is this instruction located?
+@item Can you guess why the first instruction is like this?
+@item What are the next three instructions?
+@end itemize
+
+In the second task, you will be tracing the Pintos bootloader. Set a breakpoint 
+at address @t{0x7c00}, which is where the boot sector will be loaded. Continue 
+execution until that breakpoint. Trace through the code in @file{threads/loader.S}, 
+using the source code and the disassembly file @file{threads/build/loader.asm} 
+to keep track of where you are. Also use the @command{x/i} command in GDB to disassemble 
+sequences of instructions in the boot loader, and compare the original boot loader 
+source code with both the disassembly in @file{threads/build/loader.asm} and 
+GDB.
+
+Answer the following questions in your
+design document:
+@itemize
+@item How does the bootloader read disk sectors? In particular, what BIOS interrupt
+is used?
+@item How does the bootloader decides whether it finds the Pintos kernel?
+@item What happens when the bootloader could not find the Pintos kernel?
+@item At what point does the bootloader transfer control to the Pintos kernel?
+@end itemize
+
+After the Pintos kernel take control, the initial setup is done in assembly 
+code @file{threads/start.S}. Later on, the kernel will finally kick into 
+the C world by calling the @func{pintos_init} function in @file{threads/init.c}.
+Set a breakpoint at @func{pintos_init} and then continue tracing a bit into the 
+C initialization code. Then read the source code of @func{pintos_init} function.
+For this task, you don't need to submit anything. 
+
+@node Kernel Monitor
+@subsection Kernel Monitor
+
+At last, you will get to make a small enhancement to Pintos and write some code!
+In particular, when Pintos finishes booting, it will check for the supplied 
+command line arguments stored in the kernel image. Typically you will pass
+some tests for the kernel to run, e.g., @command{pintos -- run alarm-zero}.
+If there is no command line argument passed, the kernel will simply finish up.
+This is a little boring. You task is to add a tiny kernel shell to Pintos
+so that when no command line argument is passed, it will run this shell interactively. 
+Note that this is a kernel-level shell. In later projects, you will be enhancing 
+the user program and file system parts of Pintos, at which point you will get to 
+run the regular shell.
+
+The code place for you to add this feature is in line @t{136} of 
+@file{threads/init.c} with @code{// TODO: no command line passed to kernel. 
+Run interactively}. You only need to make this monitor very simple. It starts with 
+a prompt @t{CS318> } and waits for user input. When a newline is entered, it
+parses the input and checks if it is @t{whoami}. If it is @t{whoami}, print 
+your name. Afterwards, the monitor will print the command prompt @t{CS318 >} 
+again in the next line and repeat. If the user input is @t{exit}, the monitor
+will quit to allow the kernel to finish. For the other input, print 
+@t{invalid command}. 
+
+@emph{Hint:} You may need to use some functions provided in @file{lib/kernel/console.c},
+@file{lib/stdio.c} and @file{devices/input.c}.

@@ -306,20 +306,38 @@ terminal command prompt.  Here's a few commonly useful GDB commands:
 Continues execution until @key{Ctrl+C} or the next breakpoint.
 @end deffn
 
-@deffn {GDB Command} break function
-@deffnx {GDB Command} break file:line
-@deffnx {GDB Command} break *address
+@deffn {GDB Command} si
+Execute one machine instruction
+@end deffn
+
+@deffn {GDB Command} b function
+@deffnx {GDB Command} b file:line
+@deffnx {GDB Command} b *address
 Sets a breakpoint at @var{function}, at @var{line} within @var{file}, or
-@var{address}.
+@var{address}. @code{b} is short for @code{break} or @code{breakpoint}.
 (Use a @samp{0x} prefix to specify an address in hex.)
 
-Use @code{break main} to make GDB stop when Pintos starts running.
+Use @code{b pintos_init} to make GDB stop when Pintos starts running.
 @end deffn
 
 @deffn {GDB Command} p expression
 Evaluates the given @var{expression} and prints its value.
 If the expression contains a function call, that function will actually
 be executed.
+@end deffn
+
+@deffn {GDB Command} info registers
+Print the general purpose registers, eip, eflags, and the segment selectors. For 
+a much more thorough dump of the machine register state, see QEMU's own info 
+registers command.
+@end deffn
+
+@deffn {GDB Command} x/Nx addr
+Display a hex dump of N words starting at virtual address addr. If N is omitted, it defaults to 1. addr can be any expression.
+@end deffn
+
+@deffn {GDB Command} x/Ni addr
+Display the N assembly instructions starting at addr. Using $eip as addr will display the instructions at the current instruction pointer.
 @end deffn
 
 @deffn {GDB Command} l *address
@@ -339,6 +357,22 @@ Prints the name of the function or variable that occupies @var{address}.
 
 @deffn {GDB Command} diassemble function
 Disassembles @var{function}.
+@end deffn
+
+@deffn {GDB Command} thread n
+GDB focuses on one thread (i.e., CPU) at a time. This command switches that focus to thread n, numbered from zero.
+@end deffn
+
+@deffn {GDB Command} info threads
+List all threads (i.e., CPUs), including their state (active or halted) and what function they're in.
+@end deffn
+
+@deffn {GDB Command} thread n
+Switch to symbol file file. When GDB attaches to QEMU, it has no notion of the process 
+boundaries within the virtual machine, so we have to tell it which symbols to use. 
+By default, we configure GDB to use the kernel symbol file, @file{build/kernel.o}. 
+If the machine is running user code, say @file{hello.c}, you can switch to the @file{hello}
+symbol file using @command{symbol-file examples/hello.o}.
 @end deffn
 
 We also provide a set of macros specialized for debugging Pintos,

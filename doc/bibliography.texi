@@ -71,6 +71,9 @@ Datasheet for PC timer chip.
 @uref{specs/mc146818a.pdf, , Motorola MC146818A Real Time Clock Plus
 Ram (RTC)}.  Datasheet for PC real-time clock chip.
 
+@bibdfn{PCASM}
+@uref{specs/pcasm-book.pdf, , PC Assembly Language Book}.  Guide to x86 assembly language.
+
 @node Software References
 @section Software References
 
