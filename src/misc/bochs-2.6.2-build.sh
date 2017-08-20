@@ -42,10 +42,20 @@ fi
 WD=$(pwd)
 mkdir plain && cd plain
 ../configure $CFGOPTS --enable-gdb-stub && 
-make -j8 && make install
+make -j8
+if [ $? -ne 0 ]; then
+  echo "Error: build bochs failed"
+  exit 1
+fi
+make install
 cd $WD
 mkdir with-dbg && cd with-dbg 
 ../configure --enable-debugger --disable-debugger-gui $CFGOPTS &&
 make -j8
+if [ $? -ne 0 ]; then
+  echo "Error: build bochs-dbg failed"
+  exit 1
+fi
 cp bochs $DSTDIR/bin/bochs-dbg 
-cd $WD
+rm -rf /tmp/$$
+echo "Done. bochs and bochs-dbg has been built and copied to $DSTDIR/bin"
