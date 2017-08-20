@@ -1,0 +1,235 @@
+@node Project 0--Getting Real
+@chapter Project 0: Getting Real
+
+This assignment is setup to prepare you for the later Pintos projects. It will 
+walk you through what happens after a PC is powered on till when an operating
+system is up and running, which you may have wondered about it before. You will
+setup the development environment, learn the Pintos workflow, and run/debug it 
+in QEMU and Bochs. You will then do a programming exercise to add a simple kernel 
+monitor to Pintos. Note that this assignment is simpler than the reset of the 
+projects as it is intentionally designed to help you warm up.
+
+Part of this project's description and exercise is borrowed from the MIT 
+6.828 and Caltech CS 124 course.
+
+@menu
+* Project 0 Background::        
+* Project 0 Requirements::      
+* Project 0 FAQ::               
+@end menu
+
+@node Project 0 Background
+@section Background
+
+@menu
+* Setup::       
+* PC Bootstrap::      
+* The Boot Loader::      
+* The Kernel::      
+
+@end menu
+
+@node Setup
+@subsection Setup
+
+Before we move on, make sure you have read the @ref{Introduction} section 
+and have Pintos development environment setup as described in 
+@uref{https://cs.jhu.edu/~huang/cs318/fall17/project/setup.html, , Project Setup}.
+
+
+@node PC Bootstrap
+@subsection PC Bootstrap
+
+The process of loading the operating system into memory for running
+after a PC is powered on is commonly known as @strong{bootstrapping}. The
+operating system will then be loading other software such as the shell
+for running. Two helpers are responsible for paving the way for bootstrapping: 
+BIOS (Basic Input/Output System) and bootloader. BIOS is the first software 
+that gets run when the computer is powered on to perform some test
+and initialization, e.g., checking memory available and activating video card. 
+After performing this initialization, the BIOS will then try to find a bootable
+device from some appropriate location such as floppy disk, hard disk, 
+CD-ROM, or the network. And the BIOS will pass control of the machine to the 
+bootloader who will load the operating system. 
+
+While BIOS and the bootloader have a large task, they have very few resources 
+to do it with. For example, IA32 bootloaders generally have to fit within 512 bytes 
+in memory for a partition or floppy disk bootloader (and the last 2 bytes are
+fixed signatures for recognizing it is a bootloader). For a bootloader in the
+Master Boot Record (MBR), it has to fit in an even smaller 436 bytes. In
+addition, since BIOS and bootloader are running on bare-metals, there are no 
+standard library call like @code{printf} or system call like @code{read} available. 
+Its main leverage is the limited BIOS interrupt services. Many functionalities need 
+to be implemented from scratch. For example, reading content from disk is easy 
+inside OSes with system calls, but in bootloader, it has to deal with disk directly 
+with complex hardware programming routines. As a result, the bootloaders are
+generally written in assembly language, because even C code would include too 
+much bloat!
+
+To further understand this challenge, it is useful to look at the PC's physical 
+address space, which is hard-wired to have the following general layout:
+@example
+@group
+					+------------------+  <- 0xFFFFFFFF (4GB)
+					|      32-bit      |
+					|  memory mapped   |
+					|     devices      |
+					|                  |
+					/\/\/\/\/\/\/\/\/\/\
+
+					/\/\/\/\/\/\/\/\/\/\
+					|                  |
+					|      Unused      |
+					|                  |
+					+------------------+  <- depends on amount of RAM
+					|                  |
+					|                  |
+					| Extended Memory  |
+					|                  |
+					|                  |
+					+------------------+  <- 0x00100000 (1MB)
+					|     BIOS ROM     |
+					+------------------+  <- 0x000F0000 (960KB)
+					|  16-bit devices, |
+					|  expansion ROMs  |
+					+------------------+  <- 0x000C0000 (768KB)
+					|   VGA Display    |
+					+------------------+  <- 0x000A0000 (640KB)
+					|                  |
+					|    Low Memory    |
+					|                  |
+					+------------------+  <- 0x00000000
+
+
+@end group
+@end example
+
+The first PCs, which were based on the 16-bit Intel 8088 processor, were only capable 
+of addressing 1MB of physical memory. The physical address space of an early PC 
+would therefore start at @t{0x00000000} but end at @t{0x000FFFFF} instead of @t{0xFFFFFFFF}. 
+The 640KB area marked ``Low Memory'' was the only random-access memory (RAM) that 
+an early PC could use; in fact the very earliest PCs only could be configured with 
+16KB, 32KB, or 64KB of RAM!
+
+The 384KB area from @t{0x000A0000} through @t{0x000FFFFF} was reserved by the hardware 
+for special uses such as video display buffers and firmware held in non-volatile memory. 
+The most important part of this reserved area is the BIOS, which occupies the 
+64KB region from @t{0x000F0000} through @t{0x000FFFFF}. In early PCs the BIOS was 
+held in true read-only memory (ROM), but current PCs store the BIOS in updateable 
+flash memory. 
+
+When Intel finally ``broke the one megabyte barrier'' with the 80286 and 80386 
+processors, which supported 16MB and 4GB physical address spaces respectively, 
+the PC architects nevertheless preserved the original layout for the low 1MB 
+of physical address space in order to ensure backward compatibility with existing 
+software. Modern PCs therefore have a ``hole'' in physical memory from @t{0x000A0000}
+to @t{0x00100000}, dividing RAM into ``low'' or ``conventional memory'' (the first 
+640KB) and ``extended memory'' (everything else). In addition, some space at the 
+very top of the PC's 32-bit physical address space, above all physical RAM, is 
+now commonly reserved by the BIOS for use by 32-bit PCI devices.
+
+@node The Boot Loader
+@subsection The Boot Loader
+
+IA32 bootloaders also have the unenviable position of running in
+@strong{real-addressing mode} (also known as "real mode"), where the segment
+registers are used to compute the addresses of memory accesses according to
+the following formula:  @var{address} = @var{segment} << 4 + @var{offset}.
+The code segment CS is used for instruction execution (e.g. the BIOS jumps to
+0x0000:7C00, loading CS with 0x0000 and IP with 0x7C00), SS for the stack
+segment, and DS for the data segment.  ES is frequently used for moving data
+around in the bootloader as well.  Note that each segment is 64KiB in size;
+since bootloaders often have to load kernels that are larger than 64KiB, they
+must utilize the segment registers carefully.
+
+Different operating systems are bootstrapped in different ways:
+@itemize
+@item Different kernels often expect to be loaded at different memory
+      addresses.  Some, like Linux, can be loaded to one of several addresses
+      (small kernels get loaded at address 0x10000 and large kernels get
+      loaded at address 0x100000).
+@item Different kernels occupy different amounts of space, requiring the
+      bootloader to load different amounts of data.
+@item A bootloader must also perform the specific tasks to determine the
+      starting address of the OS kernel to jump to, so that the loader
+      can hand off to the kernel.
+@end itemize
+
+Because of these OS-specific details, the bootloader must be purpose-built for
+the operating system itself.  Larger, multi-purpose bootloaders like GRUB and
+LILO are aware of how to load multiple operating systems, but such bootloaders
+can also implement a mechanism called @strong{chain-loading} to leverage an
+existing operating system bootloader.  A common chain-loading technique for
+IA32 is to copy the chain-loader to address 0x0600, and then load the next
+bootloader at 0x7C00 (emulating what the BIOS did initially).  Then, the
+chain-loader simply jumps to the next bootloader.
+
+Pintos bootloading is a pretty simple process compared to how modern OS kernels
+are loaded.  The kernel is a maximum of 512KiB (or 1024 sectors), and must be
+loaded into memory starting at the address 0x20000.  Note that the Pintos
+kernel isn't required to fit into a single 64KiB segment, so loading this will
+require manipulation of the segment registers.
+
+Pintos does require a specific kind of partition for the OS, so the Pintos
+bootloader must look for a disk partition of the appropriate type.  This means
+that the Pintos bootloader must understand how to utilize Master Boot Records
+(MBRs).  Fortunately they aren't very complicated to understand. Pintos also 
+only supports booting off of a hard disk; therefore, the Pintos
+bootloader doesn't need to check floppy drives or handle disks without an MBR
+in the first sector.
+
+When the loader finds a bootable kernel partition, it reads the
+partition's contents into memory at physical address @w{128 kB}.  The
+kernel is at the beginning of the partition, which might be larger
+than necessary due to partition boundary alignment conventions, so the
+loader reads no more than @w{512 kB} (and the Pintos build process
+will refuse to produce kernels larger than that).  Reading more data
+than this would cross into the region from @w{640 kB} to @w{1 MB} that
+the PC architecture reserves for hardware and the BIOS, and a standard
+PC BIOS does not provide any means to load the kernel above @w{1 MB}.
+
+The loader's final job is to extract the entry point from the loaded
+kernel image and transfer control to it.  The entry point is not at a
+predictable location, but the kernel's ELF header contains a pointer
+to it.  The loader extracts the pointer and jumps to the location it
+points to.
+
+The Pintos kernel command line
+is stored in the boot loader (using about 128 bytes).  The @command{pintos} program actually
+modifies a copy of the boot loader on disk each time it runs the kernel,
+inserting whatever command-line arguments the user supplies to the kernel,
+and then the kernel at boot time reads those arguments out of the boot
+loader in memory.  This is not an elegant solution, but it is simple
+and effective.
+
+@node The Kernel
+@subsection The Kernel
+
+The loader's last action is to transfer control to the kernel's entry
+point, which is @func{start} in @file{threads/start.S}.  The job of
+this code is to switch the CPU from legacy 16-bit ``@strong{real mode}'' into
+the 32-bit ``@strong{protected mode}'' used by all modern 80@var{x}86 operating
+systems.
+
+The kernel startup code's first task is actually to obtain the machine's
+memory size, by asking the BIOS for the PC's memory size.  The
+simplest BIOS function to do this can only detect up to 64 MB of RAM,
+so that's the practical limit that Pintos can support. 
+
+In additional, the kernel startup code needs to to enable the A20 line, that
+is, the CPU's address line numbered 20. For historical reasons, PCs
+boot with this address line fixed at 0, which means that attempts to
+access memory beyond the first 1 MB (2 raised to the 20th power) will
+fail.  Pintos wants to access more memory than this, so we have to
+enable it.
+
+Next, the kernel will do a basic page table setup and turn on 
+protected mode and paging (details omitted for now).  The final step 
+is to call into the C code of the Pintos kernel, which from here on
+will be the main content we will deal with.
+
+@node Project 0 Requirements
+@section Project 0 Requirements
+
+@node Project 0 FAQ
+@section Project 0 FAQ

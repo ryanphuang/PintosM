@@ -38,7 +38,7 @@
 @end macro
 
 @titlepage
-@title Pintos
+@title Pintos, JHU Edition
 @author by Ben Pfaff
 @end titlepage
 
@@ -52,6 +52,7 @@
 
 @menu
 * Introduction::                
+* Project 0--Getting Real::          
 * Project 1--Threads::          
 * Project 2--User Programs::    
 * Project 3--Virtual Memory::   
@@ -71,6 +72,7 @@
 @include localsettings.texi
 
 @include intro.texi
+@include real.texi
 @include threads.texi
 @include userprog.texi
 @include vm.texi

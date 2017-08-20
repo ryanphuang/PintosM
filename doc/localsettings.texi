@@ -3,6 +3,7 @@
 @set localgitrepo file:///usr/local/data/cs318/pintos.git
 @set gitrepo https://github.com/jhu-cs318/pintos.git
 @set localpintoshttppath https://cs.jhu.edu/~huang/cs318/fall17/pintos.tar.gz
+@set localpintosbindir /usr/local/data/cs318/x86_64
 
 @set recommendvnc
 @set recommendgit
@@ -20,7 +21,7 @@ lab machines in the JHU CS department.
 Under the @command{bash} login shell, you can do so
 with this command:
 @example
-export PATH=/usr/local/data/cs318/x86_64/bin:$PATH
+export PATH=@value{localpintosbindir}:$PATH
 @end example
 @noindent
 It is a good idea to add this line to the @file{.bash_profile} or @file{.bashrc} file

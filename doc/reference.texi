@@ -61,30 +61,6 @@ given disk.  The loader's first job, then, is to find the kernel by
 reading the partition table on each hard disk, looking for a bootable
 partition of the type used for a Pintos kernel.
 
-When the loader finds a bootable kernel partition, it reads the
-partition's contents into memory at physical address @w{128 kB}.  The
-kernel is at the beginning of the partition, which might be larger
-than necessary due to partition boundary alignment conventions, so the
-loader reads no more than @w{512 kB} (and the Pintos build process
-will refuse to produce kernels larger than that).  Reading more data
-than this would cross into the region from @w{640 kB} to @w{1 MB} that
-the PC architecture reserves for hardware and the BIOS, and a standard
-PC BIOS does not provide any means to load the kernel above @w{1 MB}.
-
-The loader's final job is to extract the entry point from the loaded
-kernel image and transfer control to it.  The entry point is not at a
-predictable location, but the kernel's ELF header contains a pointer
-to it.  The loader extracts the pointer and jumps to the location it
-points to.
-
-The Pintos kernel command line
-is stored in the boot loader.  The @command{pintos} program actually
-modifies a copy of the boot loader on disk each time it runs the kernel,
-inserting whatever command-line arguments the user supplies to the kernel,
-and then the kernel at boot time reads those arguments out of the boot
-loader in memory.  This is not an elegant solution, but it is simple
-and effective.
-
 @node Low-Level Kernel Initialization
 @subsection Low-Level Kernel Initialization
 
