@@ -17,12 +17,11 @@ the following, on top of standard Unix utilities:
 @itemize @bullet
 @item
 Required: @uref{http://gcc.gnu.org/, GCC}.  Version 4.0 or later is
-preferred.  Version 3.3 or later should work.  If the host machine has
-an 80@var{x}86 processor, then GCC should be available as @command{gcc};
+preferred.  If the host machine has an 80@var{x}86 processor, then 
+GCC should be available as @command{gcc};
 otherwise, an 80@var{x}86 cross-compiler should be available as
-@command{i386-elf-gcc}.  A sample set of commands for installing GCC
-3.3.6 as a cross-compiler are included in
-@file{src/@/misc/@/gcc-3.3.6-cross-howto}.
+@command{i386-elf-gcc}.  We provide a @uref{https://cs.jhu.edu/~huang/cs318/fall17/project/setup.html, ,setup guide} 
+and a script (@file{src/@/misc/@/toolchain-build.sh}) for installing GCC, binutils, and GDB.
 
 @item
 Required: @uref{http://www.gnu.org/software/binutils/, GNU binutils}.
@@ -74,7 +73,7 @@ install Pintos:
 
 @enumerate 1
 @item
-Install @uref{http://bochs.sourceforge.net/, Bochs}, version 2.2.6, as
+Install @uref{http://bochs.sourceforge.net/, Bochs}, version 2.6.2, as
 described below (@pxref{Building Bochs for Pintos}).
 
 @item
@@ -93,10 +92,8 @@ about missing @file{gdb-macros}, it is installed correctly.
 
 @item
 Compile the remaining Pintos utilities by typing @command{make} in
-@file{src/utils}.  Install @file{squish-pty} somewhere in @env{PATH}.
-To support VMware Player, install @file{squish-unix}.
-If your Perl is older than version 5.8.0, also install
-@file{setitimer-helper}; otherwise, it is unneeded.
+@file{src/utils}.  Install @file{squish-pty}, @file{squish-unix} and
+@file{setitimer-helper} somewhere in @env{PATH}.
 
 @item
 Pintos should now be ready for use.  If you have the Pintos reference
@@ -148,57 +145,32 @@ This version of Pintos is designed for use with Bochs 2.2.6.  A number
 of patches for this version of Bochs are included in @file{src/misc}:
 
 @table @file
-@item bochs-2.2.6-big-endian.patch
-
-Makes the GDB stubs work on big-endian systems such as Solaris/Sparc, by
-doing proper byteswapping.  It should be harmless elsewhere.
-
-@item bochs-2.2.6-jitter.patch
+@item bochs-2.6.2-jitter-plus-segv.patch
 
 Adds the ``jitter'' feature, in which timer interrupts are delivered at
 random intervals (@pxref{Debugging versus Testing}).
 
-@item bochs-2.2.6-triple-fault.patch
+@item bochs-2.6.2-xrandr-pkgconfig.patch
 
-Causes Bochs to break to GDB when a triple fault occurs and
-the GDB stub is active (@pxref{Triple Faults}).
+Fix configure flag for x11 xrandr.
 
-@item bochs-2.2.6-ms-extensions.patch
+@item bochs-2.6.2-banner-stderr.patch
 
-Needed for Bochs to compile with GCC on some hosts.  Probably
-harmless elsewhere.
+Use stderr to print the Bochs banner information.
 
-@item bochs-2.2.6-solaris-tty.patch
+@item bochs-2.6.2-block-device-check.patch
 
-Needed for Bochs to compile in terminal support on Solaris
-hosts.  Probably harmless elsewhere.
+Update block device check.
 
-@item bochs-2.2.6-page-fault-segv.patch
-
-Makes the GDB stub report a SIGSEGV to the debugger when a page-fault
-exception occurs, instead of ``signal 0.''  The former can be ignored
-with @code{handle SIGSEGV nostop} but the latter cannot.
-
-@item bochs-2.2.6-paranoia.patch
-
-Fixes compile error with modern versions of GCC.
-
-@item bochs-2.2.6-solaris-link.patch
-
-Needed on Solaris hosts.  Do not apply it elsewhere.
 @end table
 
 To apply all the patches, @command{cd} into the Bochs directory, then
 type:
 @example
-patch -p1 < $PINTOSDIR/src/misc/bochs-2.2.6-big-endian.patch
-patch -p1 < $PINTOSDIR/src/misc/bochs-2.2.6-jitter.patch
-patch -p1 < $PINTOSDIR/src/misc/bochs-2.2.6-triple-fault.patch
-patch -p1 < $PINTOSDIR/src/misc/bochs-2.2.6-ms-extensions.patch
-patch -p1 < $PINTOSDIR/src/misc/bochs-2.2.6-solaris-tty.patch
-patch -p1 < $PINTOSDIR/src/misc/bochs-2.2.6-page-fault-segv.patch
-patch -p1 < $PINTOSDIR/src/misc/bochs-2.2.6-paranoia.patch
-patch -p1 < $PINTOSDIR/src/misc/bochs-2.2.6-solaris-link.patch
+patch -p1 < $PINTOSDIR/src/misc/bochs-2.6.2-jitter-plus-segv.patch
+patch -p1 < $PINTOSDIR/src/misc/bochs-2.6.2-xrandr-pkgconfig.patch
+patch -p1 < $PINTOSDIR/src/misc/bochs-2.6.2-banner-stderr.patch
+patch -p1 < $PINTOSDIR/src/misc/bochs-2.6.2-block-device-check.patch
 @end example
 @noindent
 You will have to supply the proper @env{$PINTOSDIR}, of course.  You can
@@ -206,4 +178,4 @@ use @command{patch}'s @option{--dry-run} option if you want to test
 whether the patches would apply cleanly before trying to apply them.
 
 Sample commands to build and install Bochs for Pintos are supplied in
-@file{src/misc/bochs-2.2.6-build.sh}.
+@file{src/misc/bochs-2.6.2-build.sh}.

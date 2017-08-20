@@ -92,6 +92,8 @@ threads/kernel.lds.s: threads/kernel.lds.S threads/loader.h
 
 kernel.o: threads/kernel.lds.s $(OBJECTS) 
 	$(LD) $(LDOPTIONS) -T $< -o $@ $(OBJECTS)
+	$(OBJDUMP) -S $@ > kernel.asm
+	$(NM) -n $@ > kernel.sym
 
 kernel.bin: kernel.o
 	$(OBJCOPY) -R .note -R .comment -S $< $@
@@ -100,7 +102,10 @@ threads/loader.o: threads/loader.S
 	$(CC) -c $< -o $@ $(ASFLAGS) $(CPPFLAGS) $(DEFINES)
 
 loader.bin: threads/loader.o
-	$(LD) $(LDOPTIONS) -N -e 0 -Ttext 0x7c00 --oformat binary -o $@ $<
+	$(LD) $(LDOPTIONS) -N -e 0 -Ttext 0x7c00 -o loader.out $<
+	$(OBJDUMP) -S loader.out > loader.asm
+	$(OBJCOPY) -S -O binary -j .text loader.out $@
+	rm loader.out
 
 os.dsk: kernel.bin
 	cat $^ > $@
