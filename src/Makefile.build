@@ -76,6 +76,11 @@ SOURCES = $(foreach dir,$(KERNEL_SUBDIRS),$($(dir)_SRC))
 OBJECTS = $(patsubst %.c,%.o,$(patsubst %.S,%.o,$(SOURCES)))
 DEPENDS = $(patsubst %.o,%.d,$(OBJECTS))
 
+GDBPORT := $(shell expr `id -u` % 5000 + 25000)
+IMAGE = kernel.img
+QEMUOPTS = -serial mon:stdio -gdb tcp::$(GDBPORT)
+QEMUOPTS += $(shell if $(QEMU) -nographic -help | grep -q '^-D '; then echo '-D qemu.log'; fi)
+
 %.o: %.c
 	$(CC) -c $< -o $@ $(CFLAGS) $(CPPFLAGS) $(WARNINGS) $(DEFINES) $(DEPS)
 
@@ -104,8 +109,15 @@ kernel.img: kernel.bin loader.bin
 	rm -f $@
 	$(PINTOS) --make-disk=$@ --kernel=kernel.bin --loader=loader.bin
 
-qemu: kernel.img
-	$(QEMU) -drive file=kernel.img,index=0,media=disk,format=raw 
+qemu: $(IMAGE)
+	$(QEMU) -drive file=$(IMAGE),index=0,media=disk,format=raw $(QEMUOPTS)
+
+qemu-nox: $(IMAGE)
+	@echo "***"
+	@echo "*** Use Ctrl-a x to exit qemu. If you are under GNU Screen or Tmux and "
+	@echo "*** its prefix key is Ctrl-a, press Ctrl-a twice and x to exit."
+	@echo "***"
+	$(QEMU) -nographic -drive file=$(IMAGE),index=0,media=disk,format=raw $(QEMUOPTS)
 
 clean::
 	rm -f $(OBJECTS) $(DEPENDS) 
