@@ -130,6 +130,7 @@ clean::
 	rm -f kernel.bin.tmp
 	rm -f kernel.o kernel.lds.s
 	rm -f kernel.bin loader.bin
+	rm -f loader.asm kernel.asm kernel.sym
 	rm -f bochsout.txt bochsrc.txt
 	rm -f results grade
 
