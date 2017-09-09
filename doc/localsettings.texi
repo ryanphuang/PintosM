@@ -3,7 +3,7 @@
 @set localgitrepo file:///usr/local/data/cs318/pintos.git
 @set gitrepo https://github.com/jhu-cs318/pintos.git
 @set localpintoshttppath https://cs.jhu.edu/~huang/cs318/fall17/pintos.tar.gz
-@set localpintosbindir /usr/local/data/cs318/x86_64
+@set localpintosbindir /usr/local/data/cs318/x86_64/bin
 
 @set recommendvnc
 @set recommendgit
