@@ -28,6 +28,10 @@ require 5.0;
 
 # Perl pragma to restrict unsafe constructs
 use strict;
+
+use File::Basename;
+use lib dirname (__FILE__);
+
 #
 # According to
 # larry.jones@sdrc.com (Larry Jones)
