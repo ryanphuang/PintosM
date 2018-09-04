@@ -141,7 +141,7 @@ passed to it.)  In each case, the X, terminal, and ``no GUI'' interfaces
 should be configured, by passing @option{--with-x --with-x11 --with-term
 --with-nogui} to @command{configure}.
 
-This version of Pintos is designed for use with Bochs 2.2.6.  A number
+This version of Pintos is designed for use with Bochs 2.6.2.  A number
 of patches for this version of Bochs are included in @file{src/misc}:
 
 @table @file

@@ -778,9 +778,9 @@ reset itself, which is hardly conducive to debugging.
 In a case like this, you might appreciate being able to make Bochs
 print out more debug information, such as the exact type of fault that
 occurred.  It's not very hard.  You start by retrieving the source
-code for Bochs 2.2.6 from @uref{http://bochs.sourceforge.net} and
-saving the file @file{bochs-2.2.6.tar.gz} into a directory.  
-The script @file{pintos/src/misc/bochs-2.2.6-build.sh}
+code for Bochs 2.6.2 from @uref{http://bochs.sourceforge.net} and
+saving the file @file{bochs-2.6.2.tar.gz} into a directory.  
+The script @file{pintos/src/misc/bochs-2.6.2-build.sh}
 applies a number of patches contained in @file{pintos/src/misc}
 to the Bochs tree, then builds Bochs and installs it in a directory
 of your choice.
