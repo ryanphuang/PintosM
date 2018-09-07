@@ -20,7 +20,7 @@ Required: @uref{http://gcc.gnu.org/, GCC}.  Version 4.0 or later is
 preferred.  If the host machine has an 80@var{x}86 processor, then 
 GCC should be available as @command{gcc};
 otherwise, an 80@var{x}86 cross-compiler should be available as
-@command{i386-elf-gcc}.  We provide a @uref{https://cs.jhu.edu/~huang/cs318/fall17/project/setup.html, ,setup guide} 
+@command{i386-elf-gcc}.  We provide a @uref{@value{pintossetupguide}, ,setup guide}
 and a script (@file{src/@/misc/@/toolchain-build.sh}) for installing GCC, binutils, and GDB.
 
 @item
