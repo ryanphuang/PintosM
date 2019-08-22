@@ -32,9 +32,8 @@ def convert_comment(fname, in_place):
             modified = True
         elif idx > 0:
             prefix = line[:idx].strip()
-            if not prefix:
-                line = line[:idx] + "/**" + line[idx + 2:]
-            else:
+            if prefix:
+                # only if it's potentially a comment for a field
                 line = line[:idx] + "/**<" + line[idx + 2:]
             modified = True
         if in_place:
