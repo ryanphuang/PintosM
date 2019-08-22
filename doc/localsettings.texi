@@ -2,9 +2,9 @@
 
 @set localgitrepo file:///usr/local/data/cs318/pintos.git
 @set gitrepo https://github.com/jhu-cs318/pintos.git
-@set localpintoshttppath https://cs.jhu.edu/~huang/cs318/fall18/pintos.tar.gz
+@set localpintoshttppath https://cs.jhu.edu/~huang/cs318/fall19/pintos.tar.gz
 @set localpintosbindir /usr/local/data/cs318/x86_64/bin
-@set pintossetupguide https://cs.jhu.edu/~huang/cs318/fall18/project/setup.html
+@set pintossetupguide https://cs.jhu.edu/~huang/cs318/fall19/project/setup.html
 @set pintostestscorepercent 60
 @set pintosdesignscorepercent 40
 
