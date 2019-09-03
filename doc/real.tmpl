@@ -49,7 +49,24 @@ is used?
 >> B8: At what point does the bootloader transfer control to the Pintos kernel?
 
 ---- QUESTIONS: KERNEL ---- 
->> B9: Is there any issue in particular that you would like us to know?
+>> B9: At the entry of pintos_init(), what is the value of expression 
+init_page_dir[pd_no(ptov(0))] in hexadecimal format?
+
+>> B10: When palloc_get_page() is called for the first time, 
+    
+>> B10.1 what does the call stack look like?
+
+>> B10.2 what is the return value in hexadecimal format?
+
+>> B10.3 what is the value of expression init_page_dir[pd_no(ptov(0))] in hexadecimal format?
+
+>> B11: When palloc_get_page() is called for the third time,
+
+>> B11.1 what does the call stack look like?
+
+>> B11.2 what is the return value in hexadecimal format?
+
+>> B11.3 what is the value of expression init_page_dir[pd_no(ptov(0))] in hexadecimal format?
 
 			     Kernel Monitor
 			     ==============
