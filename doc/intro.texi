@@ -47,9 +47,8 @@ built on.
 @localmachines{}
 We will test your code on these machines, and the instructions given
 here assume this environment.  But you may also want to develop Pintos
-on your own machine to be more productive. We have provided a guide
-for doing the setup. (See @uref{@value{pintossetupguide}, , Project Setup},
-and @pxref{Installing Pintos}).
+on your own machine to be more productive. We have provided a detailed 
+guide for doing the setup. (See @uref{@value{pintossetupguide}, , Project Setup}).
 
 Once you've logged into one of these machines, either locally or
 remotely, start out by adding our binaries directory to your @env{PATH}
@@ -66,17 +65,15 @@ environment.
 @node Source Tree Overview
 @subsection Source Tree Overview
 
-Now you can extract the source for Pintos into a directory named
-@file{pintos/src}, by fetching the @url{@value{localpintoshttppath}}.
-You can also quickly clone a git repository of pintos. If you are using 
-the JHU CS lab machines, execute 
-@example
-git clone @value{localgitrepo}
-@end example
-If you are using your own machines, execute
+Now you need to get a copy of the Pintos source code distribution by cloning
+the JHU pintos repo:
 @example
 git clone @value{gitrepo}
 @end example
+
+@emph{Note: we have made some customization to the official Pintos distribution. So you
+should be only getting the source code from the above channels. In other words,
+do not download from other websites.}
 
 Let's take a look at what's inside.  Here's the directory structure
 that you should see in @file{pintos/src}:
@@ -137,6 +134,10 @@ Example user programs for use starting with project 2.
 These files may come in handy if you decide to try working with Pintos
 on your own machine.  Otherwise, you can ignore them.
 @end table
+
+If you want to understand the dependencies of these modules and functions in these
+modules, you can generate the code documentation with Doxygen. We provide on
+online code browser based on Doxygen at @url{@value{pintosdoxygenurl}}.
 
 @node Building Pintos
 @subsection Building Pintos

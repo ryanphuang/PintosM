@@ -221,8 +221,7 @@ name @file{pintos/src/p0/DESIGNDOC} and fill it in.
 @subsection Booting Pintos 
 
 Read the @ref{Introduction} section to get an overview of Pintos. Have Pintos development 
-environment setup as described in @uref{https://cs.jhu.edu/~huang/cs318/fall17/project/setup.html, 
-, Project Setup}. Afterwards, execute
+environment setup as described in @uref{@value{pintossetupguide}, Project Setup}. Afterwards, execute
 
 @example
 $ cd pintos/src/threads
@@ -290,8 +289,7 @@ sequences of instructions in the boot loader, and compare the original boot load
 source code with both the disassembly in @file{threads/build/loader.asm} and 
 GDB.
 
-Answer the following questions in your
-design document:
+Trace the Pintos bootloader and answer the following questions in your design document:
 @itemize
 @item How does the bootloader read disk sectors? In particular, what BIOS interrupt
 is used?
@@ -305,31 +303,56 @@ code @file{threads/start.S}. Later on, the kernel will finally kick into
 the C world by calling the @func{pintos_init} function in @file{threads/init.c}.
 Set a breakpoint at @func{pintos_init} and then continue tracing a bit into the 
 C initialization code. Then read the source code of @func{pintos_init} function.
-For this task, you don't need to submit anything. 
+
+Suppose we are interested in tracing the behavior of one kernel function 
+@func{palloc_get_page()} and one global variable @t{uint32_t *init_page_dir}. 
+For this exercise, you do not need to understand their meaning and the terminology 
+used in them. You will get to know them better in @ref{Project 3--Virtual Memory}.
+
+Trace the Pintos kernel and answer the following questions in your design document:
+@itemize
+@item At the entry of pintos_init(), what is the value of expression init_page_dir[pd_no(ptov(0))] in hexadecimal format?
+@item When palloc_get_page() is called for the first time,
+@itemize
+@item what does the call stack look like?
+@item what is the return value in hexadecimal format?
+@item what is the value of expression init_page_dir[pd_no(ptov(0))] in hexadecimal format?
+@end itemize
+@item When palloc_get_page() is called for the third time,
+@itemize
+@item what does the call stack look like?
+@item what is the return value in hexadecimal format?
+@item what is the value of expression init_page_dir[pd_no(ptov(0))] in hexadecimal format?
+@end itemize
+@end itemize
+
+@emph{Hint:} you will want to use GDB commands instead of printf for this exercise.
 
 @node Kernel Monitor
 @subsection Kernel Monitor
 
-At last, you will get to make a small enhancement to Pintos and write some code!
-In particular, when Pintos finishes booting, it will check for the supplied 
-command line arguments stored in the kernel image. Typically you will pass
-some tests for the kernel to run, e.g., @command{pintos -- run alarm-zero}.
-If there is no command line argument passed, the kernel will simply finish up.
-This is a little boring. You task is to add a tiny kernel shell to Pintos
-so that when no command line argument is passed, it will run this shell interactively. 
-Note that this is a kernel-level shell. In later projects, you will be enhancing 
-the user program and file system parts of Pintos, at which point you will get to 
-run the regular shell.
+At last, you will get to make a small enhancement to Pintos and write some
+code! In particular, when Pintos finishes booting, it will check for the
+supplied command line arguments stored in the kernel image. Typically you will
+pass some tests for the kernel to run, e.g., @command{pintos -- run alarm-zero}. 
+If there is no command line argument passed, the kernel will simply finish up. 
+This is a little boring.
 
-The code place for you to add this feature is in line @t{136} of 
-@file{threads/init.c} with @code{// TODO: no command line passed to kernel. 
-Run interactively}. You only need to make this monitor very simple. It starts with 
-a prompt @t{CS318> } and waits for user input. When a newline is entered, it
-parses the input and checks if it is @t{whoami}. If it is @t{whoami}, print 
-your name. Afterwards, the monitor will print the command prompt @t{CS318 >} 
-again in the next line and repeat. If the user input is @t{exit}, the monitor
-will quit to allow the kernel to finish. For the other input, print 
-@t{invalid command}. 
+You task is to add a tiny kernel shell to Pintos so that when no command line
+argument is passed, it will run this shell interactively. Note that this is a
+kernel-level shell. In later projects, you will be enhancing the user program
+and file system parts of Pintos, at which point you will get to run the regular
+shell.
+
+You only need to make this monitor very simple. It starts with a prompt @t{CS318>}
+and waits for user input. When a newline is entered, it parses the input and
+checks if it is @t{whoami}. If it is @t{whoami}, print your name. Afterwards, the
+monitor will print the command prompt @t{CS318>} again in the next line and repeat.
+If the user input is @t{exit}, the monitor will quit to allow the kernel to finish.
+For the other input, print @t{invalid command}.
+
+@emph{Hint:} the code place for you to add this feature is in line @t{136} of 
+@file{threads/init.c} with @code{// TODO: no command line passed to kernel. Run interactively.}
 
 @emph{Hint:} You may need to use some functions provided in @file{lib/kernel/console.c},
 @file{lib/stdio.c} and @file{devices/input.c}.
